@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    
+<mapper namespace="kr.co.cookinglearn.user.repository.IUserMapper">
+	
+	<!--DB컬럼명과 VO클래스의 필드명이 다르므로 ResultMap세팅 -->
+	<resultMap id="userMap" type="kr.co.cookinglearn.user.model.UserVO" >
+		<id property="userId" column="user_id"/>
+		<id property="userNo" column="user_no"/>
+		<result property="userPassword" column="user_password" />
+		<result property="nickname" column="nickname" />
+		<result property="gender" column="gender" />
+		<result property="regDate" column="reg_date" />
+		<result property="adminLevel" column="admin_level" />
+		<result property="deleteAccount" column="delete_account" />
+		<result property="deleteDay" column="delete_day" />
+	</resultMap>
+	
+	<resultMap id="mypageMap" type="kr.co.cookinglearn.user.model.process.MyClassVO" >
+		<id property="orderNo" column="order_no"/>
+		<result property="classType" column="class_type" />
+		<result property="classCode" column="class_code" />
+		<result property="startDate" column="start_date" />
+		<result property="className" column="class_name" />
+		<result property="thumbnailImg" column="thumbnail_img" />
+	</resultMap>
+	
+	<!-- 아이디 중복 체크 -->
+	<select id="checkId" resultType="int">
+		SELECT COUNT(*)
+		FROM "USER"
+		WHERE user_id = #{userId}
+	</select>
+	
+	<!-- 닉네임 중복 체크 -->
+	<select id="checkNickname" resultType="int">
+		SELECT COUNT(*)
+		FROM "USER"
+		WHERE nickname = #{nickname}
+	</select>
+	
+	<!-- 회원 가입 -->
+	<insert id="register">
+		INSERT INTO "USER"
+		(user_no, user_id, user_password, nickname, gender, admin_level)
+		VALUES (user_no_seq.NEXTVAL, #{userId}, #{userPassword}, #{nickname}, #{gender}, -1)
+	</insert>
+	
+	<!-- 회원 정보 조회 -->
+	<select id="selectOne" resultMap="userMap">
+		SELECT * FROM "USER"
+		WHERE user_id = #{userId}
+	</select>
+	
+	<!-- 회원 탈퇴 -->
+	<update id="delete">
+		UPDATE "USER"
+		SET delete_account = '1', delete_day = TO_DATE(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')
+		WHERE user_id = #{userId}
+	</update>
+	
+	<!-- 회원 정보 변경 -->
+	<update id="changeInfo">
+		UPDATE "USER"
+		SET user_password = #{userPassword}, nickname = #{nickname}, gender = #{gender}
+		WHERE user_id = #{userId}
+	</update>
+	
+	<!-- 계정 활성화 -->
+	<update id="activationUser">
+		UPDATE "USER"
+		SET admin_level = 0
+		WHERE user_id = #{userId}
+	</update>
+	
+	<!-- 계정정보와 강의상태를 입력받아 강의리스트 반환 -->
+	<select id="getMyClassList" resultMap="mypageMap">
+		SELECT * 
+		FROM "ORDER" JOIN "CLASS" USING(class_code)
+		WHERE user_no=#{userNo} AND order_process=#{orderProcess}
+	</select>
+	
+	<!-- 선택된 신청강의의 상태를 변경 -->
+	<update id="setOrderProcess">
+		UPDATE "ORDER"
+		SET order_process = #{orderProcess}
+		WHERE order_no = #{orderNo}
+	</update>
+	
+	
+	
+</mapper>	

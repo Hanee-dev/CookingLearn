@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="kr.co.cookinglearn.order.repository.IOrderMapper">
+
+	<resultMap id="orderMap" type="kr.co.cookinglearn.order.model.OrderVO" >
+		<id property="orderNo" column="order_no" />
+		<result property="userNo" column="user_no" />
+		<result property="payNo" column="pay_no"/>
+		<result property="classCode" column="class_code" />
+		<result property="pointUse" column="point_use" />
+		<result property="payment" column="payment" />
+		<result property="paymentMethod" column="payment_method" />
+		<result property="paymentDate" column="payment_date" />
+		<result property="limitDate" column="limit_date" />
+		<result property="orderProcess" column="order_process" />
+	</resultMap>
+	
+	<resultMap type="kr.co.cookinglearn.board.domain.BoardVO" id="board">
+		<id property="classCode" column="class_code"/>
+		<result property="classType" column="class_type"/>
+		<result property="classCategory" column="class_category"/>
+		<result property="thumbnailImg" column="thumbnail_img"/>
+		<result property="className" column="class_name"/>
+		<result property="classContent" column="class_content"/>
+		<result property="runTime" column="run_time"/>
+		<result property="startDate" column="start_date"/>
+		<result property="contentImg" column="content_img"/>
+		<result property="classUrl" column="class_url"/>
+		<result property="price" column="price"/>
+		<result property="maxStudent" column="max_student"/>
+	</resultMap>
+	
+	
+	<!--cartList출력  -->
+	<select id="cartList"  resultMap="board">
+		select 
+			class_code,
+		    class_type,
+		    thumbnail_img,
+		    class_name,
+		    price
+		 from "CLASS"
+		 WHERE
+			class_code = #{code} 
+	</select>
+	
+	<!-- 결제완료시 얻어와지는 데이터를 DB에 저장 -->
+	<insert id="insert">
+		INSERT INTO "ORDER"
+		VALUES(#{orderNo}, #{userNo}, #{classCode}, #{pointUse},
+		 	   #{payment}, #{paymentMethod}, sysdate, #{limitDate}, default )		
+	</insert>
+	
+	<!-- 환불요청시 order_process변경 -->
+	<update id="refund">
+		UPDATE "ORDER" SET order_process = 3
+		WHERE order_no= #{orderNo}		
+	</update>
+	
+</mapper>
